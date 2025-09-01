@@ -3,7 +3,7 @@ import api from '../../Api/Api.js';
 
 const fetchCourses = async () => {
   const response = await api.get('/courses/courses/');
-  return response.data;
+  return response.data.results || response.data; 
 };
 
 const useCourses = () => {

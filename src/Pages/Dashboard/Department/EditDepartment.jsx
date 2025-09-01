@@ -7,6 +7,8 @@ import {
   CircularProgress,
   Paper
 } from '@mui/material';
+import { Divider } from '@mui/material';
+
 import { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -45,10 +47,10 @@ const EditDepartment = () => {
   }, [department, reset]);
 
   useEffect(() => {
-  if (isSuccess) {
-    navigate('/dashboard/department', { state: { alert: { severity: 'success', message: 'تم تعديل القسم بنجاح.' } } });
-  }
-}, [isSuccess, navigate]);
+    if (isSuccess) {
+      navigate('/dashboard/department', { state: { alert: { severity: 'success', message: 'تم تعديل القسم بنجاح.' } } });
+    }
+  }, [isSuccess, navigate]);
 
   const onSubmit = (data) => {
     updateDepartment({ id, ...data });
@@ -60,11 +62,15 @@ const EditDepartment = () => {
         <Typography variant="h5" gutterBottom fontWeight="bold" sx={{ mb: 4 }}>
           Edit Department
         </Typography>
+        <Divider  sx={{mb:1}}/>
 
         {isLoading ? (
           <Typography>جاري تحميل بيانات القسم...</Typography>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
+            <Typography variant="h7" gutterBottom>
+              Department Name
+            </Typography>
             <Controller
               name="name"
               control={control}
@@ -76,7 +82,6 @@ const EditDepartment = () => {
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Department Name"
                   variant="outlined"
                   fullWidth
                   margin="dense"
@@ -85,7 +90,9 @@ const EditDepartment = () => {
                 />
               )}
             />
-
+            <Typography variant="h7" gutterBottom>
+              Description
+            </Typography>
             <Controller
               name="description"
               control={control}
@@ -97,7 +104,6 @@ const EditDepartment = () => {
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Description"
                   variant="outlined"
                   fullWidth
                   margin="dense"

@@ -11,6 +11,7 @@ import { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useCreateHall } from '../../../Components/Hook/Hall/useCreateHall';
 import { useNavigate } from 'react-router-dom';  // <-- استيراد useNavigate
+import { Divider } from '@mui/material';
 
 const CreateHall = () => {
   const navigate = useNavigate();  // <-- إنشاء المتغير
@@ -59,10 +60,13 @@ const CreateHall = () => {
         <Typography variant="h5" gutterBottom fontWeight="bold" sx={{ mb: 4 }}>
           Create New Hall
         </Typography>
+                <Divider  sx={{mb:1}}/>
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          {/* الاسم */}
-          <Controller
+ <Typography variant="h7" gutterBottom>
+                  Hall Name
+                    </Typography>     
+                         <Controller
             name="name"
             control={control}
             rules={{
@@ -73,7 +77,6 @@ const CreateHall = () => {
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Hall Name"
                 variant="outlined"
                 fullWidth
                 margin="dense"
@@ -83,8 +86,9 @@ const CreateHall = () => {
             )}
           />
 
-          {/* السعة */}
-          <Controller
+ <Typography variant="h7" gutterBottom>
+            Capacity
+                    </Typography>               <Controller
             name="capacity"
             control={control}
             rules={{
@@ -99,7 +103,6 @@ const CreateHall = () => {
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Capacity"
                 type="number"
                 inputProps={{ min: 1 }}
                 variant="outlined"
@@ -111,8 +114,10 @@ const CreateHall = () => {
             )}
           />
 
-          {/* الموقع */}
-          <Controller
+
+ <Typography variant="h7" gutterBottom>
+            Location
+                    </Typography>             <Controller
             name="location"
             control={control}
             rules={{
@@ -123,7 +128,6 @@ const CreateHall = () => {
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Location"
                 variant="outlined"
                 fullWidth
                 margin="dense"
@@ -133,8 +137,10 @@ const CreateHall = () => {
             )}
           />
 
-          {/* السعر بالساعة */}
-          <Controller
+
+ <Typography variant="h7" gutterBottom>
+         Hourly Rate
+                    </Typography>             <Controller
             name="hourly_rate"
             control={control}
             rules={{
@@ -149,7 +155,6 @@ const CreateHall = () => {
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Hourly Rate"
                 type="number"
                 inputProps={{ min: 0.01, step: 0.01 }}
                 variant="outlined"

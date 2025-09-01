@@ -19,28 +19,28 @@ const Login = () => {
   const [attempts, setAttempts] = useState(0);
   const [showLoadingScreen, setShowLoadingScreen] = useState(false);
 
- const loginMutation = useLogin(
-  (data) => {
-    setUser({ user_type: data.user_type, ...data.user });
-    setErrorMsg('');
-    setAttempts(0);
+  const loginMutation = useLogin(
+    (data) => {
+      setUser({ user_type: data.user_type, ...data.user });
+      setErrorMsg('');
+      setAttempts(0);
 
-    setShowLoadingScreen(true); // فعل عرض شاشة التحميل
+      setShowLoadingScreen(true); // فعل عرض شاشة التحميل
 
-    setTimeout(() => {
-      navigate('/dashboard/home');
-    }, 1500); // تأخير 1.5 ثانية ثم الانتقال
-  },
-  (error) => {
-    setAttempts(prev => prev + 1);
-    if (attempts >= 3) {
-      setErrorMsg('تم حظر المحاولة مؤقتاً، الرجاء الانتظار 30 ثانية');
-      setTimeout(() => setAttempts(0), 30000);
-    } else {
-      setErrorMsg(error);
+      setTimeout(() => {
+        navigate('/dashboard/home');
+      }, 1500); // تأخير 1.5 ثانية ثم الانتقال
+    },
+    (error) => {
+      setAttempts(prev => prev + 1);
+      if (attempts >= 3) {
+        setErrorMsg('تم حظر المحاولة مؤقتاً، الرجاء الانتظار 30 ثانية');
+        setTimeout(() => setAttempts(0), 30000);
+      } else {
+        setErrorMsg(error);
+      }
     }
-  }
-);
+  );
 
 
   const {
@@ -69,19 +69,20 @@ const Login = () => {
     setErrorMsg('');
     let formattedPhone = data.phone;
 
-    if (!formattedPhone.startsWith('+')) {
-      formattedPhone = formattedPhone.startsWith('0')
-        ? '+963' + formattedPhone.slice(1)
-        : '+' + formattedPhone;
+    if (formattedPhone.startsWith('0')) {
+      formattedPhone = '+963' + formattedPhone.slice(1);
+    } else if (!formattedPhone.startsWith('+')) {
+      formattedPhone = '+' + formattedPhone;
     }
 
     loginMutation.mutate({
       phone: formattedPhone,
-      password: data.password, // ✅ لا يوجد تشفير
+      password: data.password,
     });
   };
 
- if (showLoadingScreen) {
+
+  if (showLoadingScreen) {
     return <Loading fullscreen text="جاري التحميل..." />;
   }
   return (
@@ -100,30 +101,20 @@ const Login = () => {
               control={control}
               rules={{
                 required: 'الرجاء إدخال رقم الهاتف.',
-                validate: value => {
-                  const phone = value.startsWith('+') ? value : `+${value}`;
-                  return phoneRegex.test(phone) || 'رقم غير صالح';
-                }
+                validate: value => phoneRegex.test(value) || 'رقم غير صالح'
               }}
               render={({ field }) => (
-                <PhoneInput
-                  country={'sy'}
-                  value={field.value}
-                  onChange={field.onChange}
-                  inputStyle={{
-                    width: '100%',
-                    borderRadius: '6px',
-                    padding: '25px 40px',
-                  }}
-                  inputProps={{
-                    name: 'phone',
-                    required: true,
-                    autoFocus: true,
-                  }}
+                <input
+                  type="text"
+                  placeholder="ُEnter your phone number"
+                  {...field}
                 />
               )}
             />
-            {errors.phone && <p style={{ color: 'red' }}>{errors.phone.message}</p>}
+            {errors.phone && (
+              <p style={{ color: 'red' }}>{errors.phone.message}</p>
+            )}
+
 
             <label>Password</label>
             <Controller

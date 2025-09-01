@@ -1,0 +1,21 @@
+{
+  "AL HADARA INISTITUT": "AL HADARA INISTITUT",
+  "logout": "Logout",
+  "sidebar": {
+    "home": "Home",
+    "course": "Courses",
+    "courses": "Courses",
+    "courseType": "Course Type",
+    "schedualslots": "Schedule Slots",
+    "Lessons": "Private Lessons",
+    "department": "Departments",
+    "hall": "Halls",
+    "profile": "Profile",
+    "ewallet": "E-Wallet",
+    "usersManager": "Users Manager",
+    "deposits": "Deposits",
+    "transactions": "Transactions",
+    "Complaint": "Complaints",
+    "EntranceExam" :"EntranceExam"
+  }
+}

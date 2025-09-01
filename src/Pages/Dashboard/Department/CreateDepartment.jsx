@@ -15,6 +15,8 @@ import { useEffect, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useCreateDepartment } from '../../../Components/Hook/Department/useCreateDepartment.js';
 import { useNavigate } from 'react-router-dom';
+import { Divider } from '@mui/material';
+
 
 const CreateDepartment = () => {
   const {
@@ -38,11 +40,11 @@ const CreateDepartment = () => {
 
   // ✅ عند النجاح، أعد التوجيه إلى صفحة عرض الأقسام
   useEffect(() => {
-  if (isSuccess) {
-    reset();
-    navigate('/dashboard/department', { state: { alert: { severity: 'success', message: 'تم إنشاء قسم جديد بنجاح.' } } });
-  }
-}, [isSuccess, reset, navigate]);
+    if (isSuccess) {
+      reset();
+      navigate('/dashboard/department', { state: { alert: { severity: 'success', message: 'تم إنشاء قسم جديد بنجاح.' } } });
+    }
+  }, [isSuccess, reset, navigate]);
 
 
   const onSubmit = (data) => {
@@ -50,13 +52,17 @@ const CreateDepartment = () => {
   };
 
   return (
-    <Box sx={{ p: 4 }}>
+    <Box sx={{ p: 4, backgroundColor: "#f1f1f1" }} >
       <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
         <Typography variant="h5" gutterBottom fontWeight="bold" sx={{ mb: 4 }}>
           Create New Department
         </Typography>
+        <Divider sx={{ mb: 1 }} />
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
+          <Typography variant="h7" gutterBottom>
+            Department Name
+          </Typography>
           <Controller
             name="name"
             control={control}
@@ -69,7 +75,6 @@ const CreateDepartment = () => {
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Department Name"
                 variant="outlined"
                 fullWidth
                 margin="dense"
@@ -78,7 +83,9 @@ const CreateDepartment = () => {
               />
             )}
           />
-
+          <Typography variant="h7" gutterBottom>
+            Description
+          </Typography>
           <Controller
             name="description"
             control={control}
@@ -90,7 +97,6 @@ const CreateDepartment = () => {
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Description"
                 variant="outlined"
                 fullWidth
                 margin="dense"

@@ -11,6 +11,7 @@ import {
   InputLabel,
   Select,
   Alert,
+  Divider,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
@@ -96,6 +97,7 @@ const CreateCoursePage = () => {
           Create New Course
         </Typography>
 
+        <Divider sx={{mb:2}} />
         <form onSubmit={handleSubmit(onSubmit)}>
           <Typography variant="h7" gutterBottom>
             Course Name

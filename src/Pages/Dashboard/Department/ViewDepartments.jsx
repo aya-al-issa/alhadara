@@ -100,7 +100,7 @@ const ViewDepartments = () => {
   return (
     <Box sx={{
       p: { xs: 1.5, sm: 2, md: 3 },
-      backgroundColor: "#f9fafb",
+      backgroundColor: "#f1f1f1",
       minHeight: "100vh",
     }}>
       <Paper elevation={3} sx={{ borderRadius: 2, p: 2 }}>

@@ -11,6 +11,8 @@ import {
   Divider,
   CircularProgress,
   Chip,
+  Tabs,
+  Tab
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';
@@ -18,11 +20,14 @@ import useCourses from '../../../Components/Hook/Courses/useCourses';
 import { useGetDepartments } from '../../../Components/Hook/Department/useGetDepartments';
 import imageCourse from '../../../Assets/default.jpeg';
 import FilterSelect from "../../../Components/FilterSelect";
+import useScheduleSlots from '../../../Components/Hook/Courses/useScheduleSlots';
+import LinearProgress from '@mui/material/LinearProgress';
 
 const CoursesPage = () => {
   const navigate = useNavigate();
   const { data: courseData, isLoading, isError, error } = useCourses();
   const { data: departmentsData } = useGetDepartments();
+  const { data: slots = [] } = useScheduleSlots();
 
   const courses = Array.isArray(courseData) ? courseData : courseData?.courses ?? [];
   const departments = departmentsData?.map(dep => dep.name) ?? [];
@@ -30,6 +35,7 @@ const CoursesPage = () => {
 
   const [filteredData, setFilteredData] = useState([]);
   const [filters, setFilters] = useState({});
+  const [tabValue, setTabValue] = useState(0); // 0: All, 1: In Progress, 2: Others
 
   useEffect(() => {
     if (courses) {
@@ -65,6 +71,26 @@ const CoursesPage = () => {
     setFilteredData(updatedData);
   };
 
+  const getCourseProgress = (courseId) => {
+    const relatedSlots = slots.filter(slot => slot.course === courseId);
+    const progressValues = relatedSlots.map(slot => slot.course_progress);
+    if (progressValues.length === 0) return 0;
+    const total = progressValues.reduce((sum, val) => sum + val, 0);
+    return Math.round(total / progressValues.length);
+  };
+
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
+
+  // فلترة البيانات حسب التبويب
+  const tabFilteredData = filteredData.filter(course => {
+    const progress = getCourseProgress(course.id);
+    if (tabValue === 1) return progress > 0;         // In Progress
+    if (tabValue === 2) return progress === 0;       // Others
+    return true;                                     // All Courses
+  });
+
   return (
     <Box sx={{ p: 4 }}>
       {/* Header */}
@@ -74,56 +100,36 @@ const CoursesPage = () => {
           justifyContent: 'space-between',
           flexWrap: 'wrap',
           alignItems: 'center',
-          mb: 4,
+          mb: 2,
           gap: 2,
         }}
       >
         <Typography variant="h4" fontWeight="bold">
-          Courses
+          My Courses
         </Typography>
 
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
-              justifyContent: "space-between",
-              alignItems: { xs: "stretch", sm: "center" },
-              gap: 2,
-              mb: 2,
-            }}
-          >
-            {/* الفلاتر */}
-            <Box sx={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 2,
-              width: { xs: "100%", sm: "auto" },
-            }}>
-              <FilterSelect
-                filters={[
-                  {
-                    label: "Department",
-                    name: "department_name",
-                    options: departments,
-                  },
-                  {
-                    label: "Category",
-                    name: "category",
-                    options: categories,
-                  },
-                  {
-                    label: "Certification Eligible",
-                    name: "certification_eligible",
-                    options: ["Yes", "No"],
-                  },
-                ]}
-                onFilterChange={handleFilterChange}
-              />
-            </Box>
-          </Box>
+          <FilterSelect
+            filters={[
+              {
+                label: "Department",
+                name: "department_name",
+                options: departments,
+              },
+              {
+                label: "Category",
+                name: "category",
+                options: categories,
+              },
+              {
+                label: "Certification Eligible",
+                name: "certification_eligible",
+                options: ["Yes", "No"],
+              },
+            ]}
+            onFilterChange={handleFilterChange}
+          />
 
-          {/* زر الإنشاء */}
           <Button
             variant="contained"
             startIcon={<AddIcon />}
@@ -135,6 +141,13 @@ const CoursesPage = () => {
         </Box>
       </Box>
 
+      {/* Tabs */}
+      <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 4 }}>
+        <Tab label="All Courses" />
+        <Tab label="In Progress" />
+        <Tab label="Others" />
+      </Tabs>
+
       {/* Course List */}
       {isLoading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -142,7 +155,7 @@ const CoursesPage = () => {
         </Box>
       ) : isError ? (
         <Typography color="error">Failed to load courses: {error.message}</Typography>
-      ) : filteredData.length === 0 ? (
+      ) : tabFilteredData.length === 0 ? (
         <Box
           sx={{
             mt: 6,
@@ -154,12 +167,12 @@ const CoursesPage = () => {
           }}
         >
           <Typography variant="h6" align="center">
-            لا يوجد كورسات تطابق الفلاتر.
-          </Typography>
+No Courses To Display         
+ </Typography>
         </Box>
       ) : (
         <Grid container spacing={4}>
-          {filteredData.map((course, index) => (
+          {tabFilteredData.map((course, index) => (
             <Grid item xs={12} sm={6} md={4} key={course.id || index}>
               <Card sx={{ borderRadius: 4, overflow: 'hidden', boxShadow: 4 }}>
                 <CardMedia
@@ -200,6 +213,16 @@ const CoursesPage = () => {
                     Certification: {course.certification_eligible ? '✅ Available' : '❌ Not available'}
                   </Typography>
 
+                  {/* <Box sx={{ mt: 2 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      Course Progress
+                    </Typography>
+                    <LinearProgress variant="determinate" value={getCourseProgress(course.id)} sx={{ height: 10, borderRadius: 5 }} />
+                    <Typography variant="caption" color="text.secondary">
+                      {getCourseProgress(course.id)}%
+                    </Typography>
+                  </Box> */}
+
                   <Divider sx={{ my: 1, mb: 2, mt: 2 }} />
 
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -211,6 +234,15 @@ const CoursesPage = () => {
                       ${course.price}
                     </Typography>
                   </Box>
+
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    sx={{ mt: 2, borderRadius: 2 }}
+                    onClick={() => navigate(`/dashboard/courses/${course.id}`)}
+                  >
+                    View Details
+                  </Button>
                 </CardContent>
               </Card>
             </Grid>

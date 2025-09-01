@@ -20,7 +20,7 @@ const Loading = ({ fullscreen = false, text = '' }) => {
     >
       <div className="loader"></div>
       {text && (
-        <div style={{ marginTop: 12, color: '#ccc', fontSize: 16, fontWeight: 'bold' }}>
+        <div style={{ marginTop: 12, color: '#484747ff', fontSize: 16, fontWeight: 'bold' }}>
           {text}
         </div>
       )}

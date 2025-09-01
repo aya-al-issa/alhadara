@@ -1,0 +1,21 @@
+{
+  "AL HADARA INISTITUT": "مؤسسة الحضارة التعليمية",
+  "logout": "تسجيل الخروج",
+  "sidebar": {
+    "home": "الرئيسية",
+    "course": "الدورات",
+    "courses": "الدورات",
+    "courseType": "أنواع الدورات",
+    "schedualslots": "الجدول الدراسي",
+    "Lessons": "الدروس الخاصة",
+    "department": "الأقسام",
+    "hall": "القاعات",
+    "profile": "الملف الشخصي",
+    "ewallet": "المحفظة الإلكترونية",
+    "usersManager": "إدارة المستخدمين",
+    "deposits": "الودائع",
+    "transactions": "المعاملات",
+    "Complaint": "الشكاوى",
+    "EntranceExam" : "فحوص القبول "
+  }
+}

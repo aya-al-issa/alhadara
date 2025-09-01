@@ -20,20 +20,32 @@ import EditHall from './Pages/Dashboard/Hall/EditHall';
 import CourseTypeList from './Pages/Dashboard/Courses/Course Type/CourseTypeList';
 import CreateCourseType from './Pages/Dashboard/Courses/Course Type/CreateCourseType';
 import EditCourseType from './Pages/Dashboard/Courses/Course Type/EditCourseType';
-
+import SchedulePage from './Pages/Dashboard/SchedualCourse/SchedulePage';
+import AddScheduleSlot from './Pages/Dashboard/SchedualCourse/AddScheduleSlot';
+import CourseDetailsPage from './Pages/Dashboard/Courses/CourseDetailsPage';
+import CreateGuestEnrollmentPage from './Pages/Dashboard/Enrollment/CreateGuestEnrollmentPage';
+import EnrollmentList from './Pages/Dashboard/Enrollment/EnrollmentList';
+import PrivateLessonsTable from './Pages/Dashboard/Lessons/PrivateLessonsTable';
+import { useTranslation } from 'react-i18next';
+import Cookies from 'js-cookie';
+import ShowComplaints from './Pages/Dashboard/Complaint/ShowComplaints';
+import CreateExamForm from './Pages/Dashboard/EntranceExam/CreateExamForm';
+import ExamPage from './Pages/Dashboard/EntranceExam/ExamPage';
+import CreateQuestionBank from './Pages/Dashboard/EntranceExam/QuestionBanks/CreateQuestionBank';
+import NotFound from './Components/Dashboard/PageError/404';
 
 function ProtectedRoute({ children, allowedRoles }) {
-  const { user, loading } = useAuth();
+  const token = Cookies.get('token');
+  const userType = Cookies.get('user_type');
 
-  if (loading) {
-    return <div className="text-center mt-5">جار التحقق من الصلاحيات...</div>; // يمكنك استبداله بـ Loader أجمل
-  }
-
-  if (!user) {
+  if (!token) {
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(user.user_type)) {
+  if (
+    allowedRoles &&
+    !allowedRoles.map(r => r.toLowerCase()).includes(userType?.toLowerCase())
+  ) {
     return <Navigate to="/dashboard/home" replace />;
   }
 
@@ -43,7 +55,8 @@ function ProtectedRoute({ children, allowedRoles }) {
 
 function App() {
   const { logout } = useAuth();
-
+  const { i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
   useEffect(() => {
     const handleLogout = () => {
       logout();
@@ -56,13 +69,19 @@ function App() {
     };
   }, [logout]);
 
+
+  useEffect(() => {
+    document.body.dir = isRTL ? 'rtl' : 'ltr';
+  }, [isRTL]);
+
   return (
-    <div className="App">
+    <div className="body">
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
 
           <Route path="/dashboard" element={<Dashboard />}>
+            <Route path="*" element={<NotFound />} />
             <Route path="home" element={<OverViewPage />} />
 
             {/* 🔒 فقط للمسؤولين Admin */}
@@ -70,31 +89,31 @@ function App() {
             <Route
               path="halls"
               element={
-                <ProtectedRoute allowedRoles={['Admin', 'reception']}>
-                  <ViewHalls/>
+                <ProtectedRoute allowedRoles={['admin', 'reception']}>
+                  <ViewHalls />
                 </ProtectedRoute>
               }
             />
-             <Route
+            <Route
               path="create-hall"
               element={
-                <ProtectedRoute allowedRoles={['Admin', 'reception']}>
+                <ProtectedRoute allowedRoles={['admin', 'reception']}>
                   <CreateHall />
                 </ProtectedRoute>
               }
             />
-             <Route
+            <Route
               path="edit-hall/:id"
               element={
-                <ProtectedRoute allowedRoles={['Admin', 'reception']}>
-                  <EditHall/>
+                <ProtectedRoute allowedRoles={['admin', 'reception']}>
+                  <EditHall />
                 </ProtectedRoute>
               }
             />
             <Route
               path="create-department"
               element={
-                <ProtectedRoute allowedRoles={['Admin', 'reception']}>
+                <ProtectedRoute allowedRoles={['admin', 'reception']}>
                   <CreateDepartment />
                 </ProtectedRoute>
               }
@@ -102,7 +121,7 @@ function App() {
             <Route
               path="department"
               element={
-                <ProtectedRoute allowedRoles={['Admin', 'reception']}>
+                <ProtectedRoute allowedRoles={['admin', 'reception']}>
                   <ViewDepartments />
                 </ProtectedRoute>
               }
@@ -110,7 +129,7 @@ function App() {
             <Route
               path="edit-department/:id"
               element={
-                <ProtectedRoute allowedRoles={['Admin', 'reception']}>
+                <ProtectedRoute allowedRoles={['admin', 'reception']}>
                   <EditDepartment />
                 </ProtectedRoute>
               }
@@ -118,7 +137,7 @@ function App() {
             <Route
               path="profile"
               element={
-                <ProtectedRoute allowedRoles={['Admin']}>
+                <ProtectedRoute allowedRoles={['admin']}>
                   <ViewProfileAdmin />
                 </ProtectedRoute>
               }
@@ -126,7 +145,7 @@ function App() {
             <Route
               path="ewallet"
               element={
-                <ProtectedRoute allowedRoles={['Admin', 'reception']}>
+                <ProtectedRoute allowedRoles={['admin', 'reception']}>
                   <ViewEWallet />
                 </ProtectedRoute>
               }
@@ -134,7 +153,7 @@ function App() {
             <Route
               path="deposit-request"
               element={
-                <ProtectedRoute allowedRoles={['Admin', 'reception']}>
+                <ProtectedRoute allowedRoles={['admin', 'reception']}>
                   <ViewDepositeRequest />
                 </ProtectedRoute>
               }
@@ -142,41 +161,49 @@ function App() {
             <Route
               path="transactions"
               element={
-                <ProtectedRoute allowedRoles={['Admin', 'reception']}>
+                <ProtectedRoute allowedRoles={['admin', 'reception']}>
                   <ViewTransactions />
                 </ProtectedRoute>
               }
             />
 
-            {/* 🟢 متاح لـ Admin و reception */}
+            {/* 🟢 متاح لـ admin و reception */}
             <Route
               path="courses"
               element={
-                <ProtectedRoute allowedRoles={['Admin', 'reception']}>
+                <ProtectedRoute allowedRoles={['admin', 'reception']}>
                   <CoursesPage />
                 </ProtectedRoute>
               }
             />
-             <Route
+            <Route
+              path="courses/:id"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'reception']}>
+                  <CourseDetailsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="course-type"
               element={
-                <ProtectedRoute allowedRoles={['Admin', 'reception']}>
+                <ProtectedRoute allowedRoles={['admin', 'reception']}>
                   <CourseTypeList />
                 </ProtectedRoute>
               }
             />
-             <Route
+            <Route
               path="course-type/edit/:id"
               element={
-                <ProtectedRoute allowedRoles={['Admin', 'reception']}>
+                <ProtectedRoute allowedRoles={['admin', 'reception']}>
                   <EditCourseType />
                 </ProtectedRoute>
               }
             />
-             <Route
+            <Route
               path="course-type/create"
               element={
-                <ProtectedRoute allowedRoles={['Admin', 'reception']}>
+                <ProtectedRoute allowedRoles={['admin', 'reception']}>
                   <CreateCourseType />
                 </ProtectedRoute>
               }
@@ -184,16 +211,88 @@ function App() {
             <Route
               path="courses/create-course"
               element={
-                <ProtectedRoute allowedRoles={['Admin', 'reception']}>
+                <ProtectedRoute allowedRoles={['admin', 'reception']}>
                   <CreateCoursePage />
                 </ProtectedRoute>
               }
             />
-            
+            <Route
+              path="courses/schedual"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'reception']}>
+                  <SchedulePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="courses/schedual/create"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'reception']}>
+                  <AddScheduleSlot />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="courses/schedual/guest-enrollment/:slotId"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'reception']}>
+                  <CreateGuestEnrollmentPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="courses/enrollments"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'reception']}>
+                  <EnrollmentList />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="privite-lesson"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'reception']}>
+                  <PrivateLessonsTable />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="complaint"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <ShowComplaints />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="EntranceExam/create"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <CreateExamForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="EntranceExam"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <ExamPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="qb"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <CreateQuestionBank />
+                </ProtectedRoute>
+              }
+            />
+             
           </Route>
 
           {/* إعادة توجيه للمسارات غير المعروفة */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </div>
