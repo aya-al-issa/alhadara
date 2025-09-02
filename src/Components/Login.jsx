@@ -10,7 +10,7 @@ import { useLogin } from '../Components/Hook/useLogin.js';
 import { useForm, Controller } from 'react-hook-form';
 import Loading from './Loader/Loading.jsx';
 
-const phoneRegex = /^(09\d{8}|\+9639\d{8}|009639\d{8})$/;
+const phoneRegex = /^(09\d{8}|009\d{8})$/; // قبول فقط 09xxxxxxx أو 009xxxxxxx
 
 const Login = () => {
   const { setUser } = useAuth();
@@ -64,22 +64,27 @@ const Login = () => {
   };
 
   const onSubmit = (data) => {
-    if (attempts >= 3) return;
+  if (attempts >= 3) return;
 
-    setErrorMsg('');
-    let formattedPhone = data.phone;
+  setErrorMsg('');
+  let formattedPhone = data.phone;
 
-    if (formattedPhone.startsWith('0')) {
-      formattedPhone = '+963' + formattedPhone.slice(1);
-    } else if (!formattedPhone.startsWith('+')) {
-      formattedPhone = '+' + formattedPhone;
-    }
+  // تحويل 009xxxxxx → 09xxxxxx
+  if (formattedPhone.startsWith('009')) {
+    formattedPhone = '0' + formattedPhone.slice(3);
+  }
 
-    loginMutation.mutate({
-      phone: formattedPhone,
-      password: data.password,
-    });
-  };
+  // تحقق من صحة الرقم بعد التحويل
+  if (!phoneRegex.test(formattedPhone)) {
+    setErrorMsg('رقم غير صالح');
+    return;
+  }
+
+  loginMutation.mutate({
+    phone: formattedPhone,
+    password: data.password,
+  });
+};
 
 
   if (showLoadingScreen) {

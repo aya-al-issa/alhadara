@@ -2,12 +2,12 @@
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import SchoolRoundedIcon from '@mui/icons-material/SchoolRounded';
 import LibraryAddRoundedIcon from '@mui/icons-material/LibraryAddRounded';
-import SettingsIcon from '@mui/icons-material/Settings';
-
+import EditSquareIcon from '@mui/icons-material/EditSquare';
 import HomeIcon from '@mui/icons-material/Home';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import SensorDoorIcon from '@mui/icons-material/SensorDoor';
 import WalletIcon from '@mui/icons-material/Wallet';
+import DynamicFeedIcon from '@mui/icons-material/DynamicFeed';
 
 export const navItems = [
   {
@@ -34,6 +34,11 @@ export const navItems = [
        {
         label: 'sidebar.schedualslots',
         path: '/dashboard/courses/schedual',
+        allowedRoles: ['admin', 'reception'],
+      },
+       {
+        label: 'sidebar.Enrolment',
+        path: '/dashboard/courses/enrollments',
         allowedRoles: ['admin', 'reception'],
       },
        {
@@ -85,12 +90,12 @@ export const navItems = [
   },
   {
     label: 'sidebar.Complaint',
-    icon: <AccountCircleIcon />,
+    icon: <DynamicFeedIcon />,
     path: '/dashboard/complaint',
     allowedRoles: ['admin'],
   },  {
     label: 'sidebar.EntranceExam',
-    icon: <AccountCircleIcon />,
+    icon: <EditSquareIcon />,
     path: '/dashboard/EntranceExam',
     allowedRoles: ['admin'],
   }

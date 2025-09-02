@@ -11,33 +11,38 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const { userType, setUserType } = useUserType();
 
-  const fetchUser = async () => {
-    try {
-      const response = await api.get("/auth/users/me/");
-      let userData = response.data;
+const fetchUser = async () => {
+  const token = Cookies.get('token'); // تحقق من وجود توكن
+  if (!token) {
+    setUser(null);
+    setLoading(false);
+    return;
+  }
 
-      // إذا الـ API ما رجع user_type → نستخدم اللي موجود بالكونتكست (كوكيز)
-      if (!userData.user_type && userType) {
-        userData = { ...userData, user_type: userType };
-      }
+  try {
+    const response = await api.get("/auth/users/me/");
+    let userData = response.data;
 
-      // إذا رجع user_type من API → نخزنه بالكونتكست (كوكيز كمان)
-      if (userData.user_type) {
-        setUserType(userData.user_type);
-      }
-
-      setUser(userData);
-    } catch (error) {
-      // fallback → نستخدم اللي مخزن بالكوكيز
-      if (userType) {
-        setUser({ user_type: userType });
-      } else {
-        setUser(null);
-      }
-    } finally {
-      setLoading(false);
+    if (!userData.user_type && userType) {
+      userData = { ...userData, user_type: userType };
     }
-  };
+
+    if (userData.user_type) {
+      setUserType(userData.user_type);
+    }
+
+    setUser(userData);
+  } catch (error) {
+    if (userType) {
+      setUser({ user_type: userType });
+    } else {
+      setUser(null);
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+
    // 🔥 وظيفة تسجيل الخروج
   const logout = () => {
     setUser(null);

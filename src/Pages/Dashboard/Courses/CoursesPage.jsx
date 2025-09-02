@@ -208,6 +208,12 @@ No Courses To Display
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                     Duration: {course.duration} hours
                   </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    Language: {course.required_language_name} 
+                  </Typography>
+                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    Level: {course.required_language_level_display} 
+                  </Typography>
 
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                     Certification: {course.certification_eligible ? '✅ Available' : '❌ Not available'}
