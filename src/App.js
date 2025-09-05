@@ -33,6 +33,9 @@ import CreateExamForm from './Pages/Dashboard/EntranceExam/CreateExamForm';
 import ExamPage from './Pages/Dashboard/EntranceExam/ExamPage';
 import CreateQuestionBank from './Pages/Dashboard/EntranceExam/QuestionBanks/CreateQuestionBank';
 import NotFound from './Components/Dashboard/PageError/404';
+import ViewBookings from './Pages/Dashboard/Booking/ViewBookings';
+import AddTeacher from './Pages/Dashboard/Teacher/AddTeacher';
+import TeachersList from './Pages/Dashboard/Teacher/TeachersList';
 
 function ProtectedRoute({ children, allowedRoles }) {
   const token = Cookies.get('token');
@@ -285,6 +288,30 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <CreateQuestionBank />
+                </ProtectedRoute>
+              }
+            />
+             <Route
+              path="booking"
+              element={
+                <ProtectedRoute allowedRoles={['reception']}>
+                  <ViewBookings />
+                </ProtectedRoute>
+              }
+            />
+             <Route
+              path="teacher/create"
+              element={
+                <ProtectedRoute allowedRoles={['reception','Admin']}>
+                  <AddTeacher/>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="teacher"
+              element={
+                <ProtectedRoute allowedRoles={['Admin']}>
+                  <TeachersList/>
                 </ProtectedRoute>
               }
             />

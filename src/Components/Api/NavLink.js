@@ -61,6 +61,12 @@ export const navItems = [
     allowedRoles: ['admin', 'reception'],
   },
   {
+    label: 'sidebar.Teachers',
+    icon: <LibraryAddRoundedIcon />,
+    path: '/dashboard/teacher',
+    allowedRoles: ['admin', 'reception'],
+  },
+  {
     label: 'sidebar.profile',
     icon: <AccountCircleIcon />,
     path: '/dashboard/profile',
@@ -98,5 +104,10 @@ export const navItems = [
     icon: <EditSquareIcon />,
     path: '/dashboard/EntranceExam',
     allowedRoles: ['admin'],
+  }, {
+    label: 'sidebar.Booking',
+    icon: <EditSquareIcon />,
+    path: '/dashboard/booking',
+    allowedRoles: ['reception'],
   }
 ];
