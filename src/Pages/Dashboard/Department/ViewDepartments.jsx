@@ -1,257 +1,230 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   Box,
   Typography,
-  Paper,
   Stack,
-  Pagination,
-  Divider,
-  IconButton,
+  Grid,
+  Card,
+  CardContent,
+  CardMedia,
   Button,
-  Tooltip,
   Snackbar,
   Alert,
+  TextField,
 } from "@mui/material";
-import { useGetDepartments } from '../../../Components/Hook/Department/useGetDepartments';
-import { useDeleteDepartment } from '../../../Components/Hook/Department/useDeleteDepartment';
-
-import { Delete as DeleteIcon, Edit, Add } from "@mui/icons-material";
+import { Search as SearchIcon, Add } from "@mui/icons-material";
+import { useGetDepartments } from "../../../Components/Hook/Department/useGetDepartments";
+import { useDeleteDepartment } from "../../../Components/Hook/Department/useDeleteDepartment";
 import { useNavigate, useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 
 const ViewDepartments = () => {
   const { data: departments = [], isLoading, isError } = useGetDepartments();
-  const { mutate: deleteDepartment, isPending: isDeleting } = useDeleteDepartment();
-
-  const [openDialog, setOpenDialog] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
-
-  const [alertOpen, setAlertOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertSeverity, setAlertSeverity] = useState('success');
-
-  const [page, setPage] = useState(1);
-  const itemsPerPage = 10;
+  const { mutate: deleteDepartment } = useDeleteDepartment();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // عند تحميل الصفحة، إذا كانت هناك رسالة في location.state نعرضها
+  const [search, setSearch] = useState("");
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertSeverity, setAlertSeverity] = useState("success");
+
   useEffect(() => {
     if (location.state && location.state.alert) {
       setAlertMessage(location.state.alert.message);
       setAlertSeverity(location.state.alert.severity);
       setAlertOpen(true);
-
-      // نزيل الرسالة من التاريخ حتى لا تظهر عند العودة للصفحة
       navigate(location.pathname, { replace: true });
     }
   }, [location, navigate]);
 
-  const handleChangePage = (event, value) => {
-    setPage(value);
-  };
-
-  const pageCount = Math.ceil(departments.length / itemsPerPage);
-  const startIndex = (page - 1) * itemsPerPage;
-  const currentData = departments.slice(startIndex, startIndex + itemsPerPage);
-
-  const handleEdit = (id) => {
-    navigate(`/dashboard/edit-department/${id}`);
-  };
-
-  const handleOpenDialog = (id) => {
-    setSelectedId(id);
-    setOpenDialog(true);
-  };
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-    setSelectedId(null);
-  };
-
-  const handleConfirmDelete = () => {
-    if (selectedId) {
-      deleteDepartment(selectedId, {
-        onSuccess: () => {
-          setAlertMessage('تم حذف القسم بنجاح.');
-          setAlertSeverity('success');
-          setAlertOpen(true);
-          handleCloseDialog();
-        },
-        onError: () => {
-          setAlertMessage('حدث خطأ أثناء حذف القسم.');
-          setAlertSeverity('error');
-          setAlertOpen(true);
-          handleCloseDialog();
-        },
-      });
-    }
-  };
-
   const handleAlertClose = (event, reason) => {
-    if (reason === 'clickaway') return;
+    if (reason === "clickaway") return;
     setAlertOpen(false);
   };
 
+  // فلترة الأقسام حسب السيرش
+  const filteredDepartments = useMemo(
+    () =>
+      departments.filter((dept) =>
+        dept.name.toLowerCase().includes(search.toLowerCase())
+      ),
+    [departments, search]
+  );
+
   return (
-    <Box sx={{
-      p: { xs: 1.5, sm: 2, md: 3 },
-      backgroundColor: "#f1f1f1",
-      minHeight: "100vh",
-    }}>
-      <Paper elevation={3} sx={{ borderRadius: 2, p: 2 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h6" fontWeight="bold" sx={{ fontSize: { xs: "1.2rem", sm: "1.5rem" } }}
->
-            Departments Manager
-          </Typography>
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => navigate("/dashboard/create-department")}
-          >
-            New Department
-          </Button>
-        </Stack>
-        <Divider sx={{ mb: 2 }} />
-
-        {isLoading ? (
-          <Typography>جاري التحميل...</Typography>
-        ) : isError ? (
-          <Typography color="error">حدث خطأ أثناء تحميل الأقسام.</Typography>
-        ) : departments.length === 0 ? (
-          <Typography color="text.secondary">لا يوجد أقسام حالياً.</Typography>
-        ) : (
-          <>
-            <Box sx={{ display: { xs: "none", sm: "block" }, overflowX: "auto" }}>
-              <table className="table table-striped table-hover" style={{ minWidth: 600 }}>
-                <thead className="table-dark">
-                  <tr>
-                    <th>Department Name</th>
-                    <th>Description</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentData.map((dept) => (
-                    <tr key={dept.id}>
-                      <td>{dept.name}</td>
-                      <td>{dept.description}</td>
-                      <td>
-                        <Stack direction="row" spacing={1}>
-                          <Tooltip title="تعديل">
-                            <IconButton onClick={() => handleEdit(dept.id)} color="primary">
-                              <Edit />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="حذف">
-                            <IconButton
-                              onClick={() => handleOpenDialog(dept.id)}
-                              color="error"
-                              disabled={isDeleting}
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          </Tooltip>
-                        </Stack>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </Box>
-
-            {/* ✅ بطاقات بديلة على الجوال */}
-            <Box sx={{ display: { xs: "block", sm: "none" } }}>
-              {currentData.map((dept) => (
-                <Paper
-                  key={dept.id}
-                  variant="outlined"
-                  sx={{ p: 2, mb: 3, borderRadius: 2 }}
-                >
-                  <Typography fontWeight="bold">{dept.name}</Typography>
-                  <Typography variant="body2">Desc: {dept.description}</Typography>
-
-                  <Stack direction="row" spacing={1} mt={2}>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      onClick={() => handleEdit(dept.id)}
-                      fullWidth
-                    >
-                      Update
-                    </Button>
-                    <Button
-                      variant="contained"
-                      color="error"
-                      size="small"
-                      onClick={() => handleOpenDialog(dept.id)}
-                      fullWidth
-                      disabled={isDeleting}
-                    >
-                      Delete
-                    </Button>
-                  </Stack>
-                </Paper>
-              ))}
-            </Box>
-
-            <Stack direction="row" justifyContent="center" mt={3}>
-              <Pagination
-                count={pageCount}
-                page={page}
-                onChange={handleChangePage}
-                color="primary"
-                shape="rounded"
-              />
-            </Stack>
-          </>
-        )}
-
-
-
-      </Paper>
-
-      {/* Dialog تأكيد الحذف */}
-      <Dialog
-        open={openDialog}
-        onClose={handleCloseDialog}
-        aria-labelledby="delete-dialog-title"
-        aria-describedby="delete-dialog-description"
+    <Box sx={{ p: 3, backgroundColor: "#f1f1f1", minHeight: "100vh" }}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
       >
-        <DialogTitle id="delete-dialog-title">تأكيد الحذف</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="delete-dialog-description">
-            هل أنت متأكد أنك تريد حذف هذا القسم؟ لا يمكن التراجع عن هذه العملية.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>إلغاء</Button>
-          <Button
-            onClick={handleConfirmDelete}
-            color="error"
-            variant="contained"
-            autoFocus
-            disabled={isDeleting}
-          >
-            نعم، احذف
-          </Button>
-        </DialogActions>
-      </Dialog>
+        <Typography variant="h5" fontWeight="bold">
+          Departments Manager
+        </Typography>
+        <Button
+          variant="contained"
+          startIcon={<Add />}
+          onClick={() => navigate("/dashboard/create-department")}
+        >
+          New Department
+        </Button>
+      </Stack>
+
+      {/* Creative Search */}
+      <Box sx={{ mb: 3, position: "relative", width: { xs: "100%", sm: 400 } }}>
+        <TextField
+          variant="outlined"
+          fullWidth
+          placeholder="Search departments..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <Box sx={{ display: "flex", alignItems: "center", pl: 1 }}>
+                <SearchIcon sx={{ color: "gray" }} />
+              </Box>
+            ),
+            sx: {
+              borderRadius: "25px",
+              backgroundColor: "#fff",
+              "& .MuiOutlinedInput-notchedOutline": { borderColor: "#ccc" },
+              "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#1976d2" },
+              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                borderColor: "#1976d2",
+                boxShadow: "0 0 5px rgba(25, 118, 210, 0.5)",
+              },
+              transition: "all 0.3s ease",
+            },
+          }}
+        />
+      </Box>
+
+      {isLoading ? (
+        <Typography>Loading...</Typography>
+      ) : isError ? (
+        <Typography color="error">Error loading departments.</Typography>
+      ) : filteredDepartments.length === 0 ? (
+        <Typography color="text.secondary">No departments found.</Typography>
+      ) : (
+        <Grid container spacing={2}>
+          <AnimatePresence>
+            {filteredDepartments.map((dept) => (
+              <Grid
+                item
+                xs={12}
+                sm={4} // 3 كروت في الصف على الشاشات الكبيرة
+                key={dept.id}
+              >
+                <motion.div
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Card
+                    sx={{
+                      height: 350,
+                      borderRadius: 2,
+                      boxShadow: 3,
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      "&:hover": { transform: "scale(1.03)", transition: "0.3s" },
+                    }}
+                  >
+                    <CardMedia
+                      component="img"
+                      height="140"
+                      image={
+                        dept.icon?.image_url ||
+                        "https://via.placeholder.com/300x140.png?text=No+Image"
+                      }
+                      alt={dept.name}
+                      sx={{ objectFit: "cover" }}
+                    />
+                    <CardContent sx={{ flexGrow: 1 }}>
+                      <Typography
+                        gutterBottom
+                        variant="h6"
+                        sx={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {dept.name}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "text.secondary",
+                          display: "-webkit-box",
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {dept.description || "No description"}
+                      </Typography>
+                    </CardContent>
+                    <Stack direction="row" spacing={1} p={2}>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        size="small"
+                        onClick={() =>
+                          navigate(`/dashboard/edit-department/${dept.id}`)
+                        }
+                      >
+                        EDIT
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        fullWidth
+                        size="small"
+                        onClick={() =>
+                          deleteDepartment(dept.id, {
+                            onSuccess: () => {
+                              setAlertMessage("تم حذف القسم بنجاح.");
+                              setAlertSeverity("success");
+                              setAlertOpen(true);
+                            },
+                            onError: () => {
+                              setAlertMessage("حدث خطأ أثناء حذف القسم.");
+                              setAlertSeverity("error");
+                              setAlertOpen(true);
+                            },
+                          })
+                        }
+                      >
+                        DELETE
+                      </Button>
+                    </Stack>
+                  </Card>
+                </motion.div>
+              </Grid>
+            ))}
+          </AnimatePresence>
+        </Grid>
+      )}
 
       {/* رسالة التنبيه */}
       <Snackbar
         open={alertOpen}
         autoHideDuration={4000}
         onClose={handleAlertClose}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert onClose={handleAlertClose} severity={alertSeverity} sx={{ width: '100%' }}>
+        <Alert
+          onClose={handleAlertClose}
+          severity={alertSeverity}
+          sx={{ width: "100%" }}
+        >
           {alertMessage}
         </Alert>
       </Snackbar>

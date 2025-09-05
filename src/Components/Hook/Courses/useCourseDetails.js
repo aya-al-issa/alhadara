@@ -10,7 +10,9 @@ const useCourseDetails = (id) => {
   return useQuery({
     queryKey: ['courseDetails', id],
     queryFn: () => fetchCourseDetails(id),
-    enabled: !!id, // لا يجلب البيانات إلا إذا كان الـ id موجود
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000,  // 5 دقائق قبل اعتبارها قديمة
+    cacheTime: 30 * 60 * 1000, // 30 دقيقة تبقى في الكاش
   });
 };
 

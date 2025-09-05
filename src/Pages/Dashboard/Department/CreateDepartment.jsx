@@ -7,15 +7,16 @@ import {
   MenuItem,
   Select,
   FormControl,
-  InputLabel,
+  Stack,
   CircularProgress
 } from '@mui/material';
 import Paper from '@mui/material/Paper';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useCreateDepartment } from '../../../Components/Hook/Department/useCreateDepartment.js';
 import { useNavigate } from 'react-router-dom';
 import { Divider } from '@mui/material';
+import { useUploadDepartmentIcon } from '../../../Components/Hook/Department/useUploadDepartmentIcon.js';
 
 
 const CreateDepartment = () => {
@@ -37,6 +38,8 @@ const CreateDepartment = () => {
   } = useCreateDepartment();
 
   const navigate = useNavigate();
+  const uploadIcon = useUploadDepartmentIcon();
+  const [selectedFile, setSelectedFile] = useState(null);
 
   // ✅ عند النجاح، أعد التوجيه إلى صفحة عرض الأقسام
   useEffect(() => {
@@ -48,7 +51,15 @@ const CreateDepartment = () => {
 
 
   const onSubmit = (data) => {
-    createDepartment(data);
+    createDepartment(data, {
+      onSuccess: (newDept) => {
+        if (selectedFile) {
+          uploadIcon.mutate({ departmentId: newDept.id, file: selectedFile });
+        }
+        reset();
+        navigate('/dashboard/department', { state: { alert: { severity: 'success', message: 'تم إنشاء قسم جديد بنجاح.' } } });
+      }
+    });
   };
 
   return (
@@ -105,15 +116,24 @@ const CreateDepartment = () => {
               />
             )}
           />
+          <Stack direction="column" spacing={1} sx={{ mt: 2 }}>
+            <Typography variant="subtitle1">Department Icon</Typography>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setSelectedFile(e.target.files[0])}
+            />
+          </Stack>
+
 
           <Box sx={{ textAlign: 'right', mt: 3 }}>
             <Button
               type="submit"
               variant="contained"
               sx={{ borderRadius: '20px', textTransform: 'none' }}
-              disabled={isPending}
+              disabled={isPending || uploadIcon.isPending}
             >
-              {isPending ? <CircularProgress size={24} color="inherit" /> : 'Create Department'}
+              {isPending || uploadIcon.isPending ? <CircularProgress size={24} color="inherit" /> : 'Create Department'}
             </Button>
           </Box>
 

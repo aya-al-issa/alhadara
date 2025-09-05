@@ -64,7 +64,7 @@ export const navItems = [
     label: 'sidebar.Teachers',
     icon: <LibraryAddRoundedIcon />,
     path: '/dashboard/teacher',
-    allowedRoles: ['admin', 'reception'],
+    allowedRoles: ['admin'],
   },
   {
     label: 'sidebar.profile',
